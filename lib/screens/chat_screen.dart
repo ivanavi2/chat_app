@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:provider/provider.dart';
 
 import '../widgets/chat/messages.dart';
 import '../widgets/chat/new_message.dart';
+import '../view_models/user_viewmodel.dart';
+import '../view_models/messages_viewmodel.dart';
 
 class ChatScreen extends StatefulWidget {
   @override
@@ -34,6 +36,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+/*     final currentUser =
+        Provider.of<UserViewModel>(context, listen: false).currentUser; */
+
     return Scaffold(
       appBar: AppBar(
         title: Text('FlutterChat'),
@@ -59,20 +64,31 @@ class _ChatScreenState extends State<ChatScreen> {
               ],
               onChanged: (itemIdentifier) {
                 if (itemIdentifier == 'logout') {
-                  FirebaseAuth.instance.signOut();
+                  Provider.of<UserViewModel>(context, listen: false).signOut();
                 }
               }),
         ],
       ),
-      body: Container(
-        child: Column(
-          children: [
-            Expanded(
-              child: Messages(),
+      body: FutureBuilder(
+        future: Provider.of<UserViewModel>(context).getCurrentUser(),
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+          return ChangeNotifierProvider(
+            create: (context) => MessageViewModel(snapshot.data),
+            child: Container(
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Messages(),
+                  ),
+                  NewMessage(),
+                ],
+              ),
             ),
-            NewMessage(),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

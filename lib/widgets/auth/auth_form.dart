@@ -1,61 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'dart:io';
 
 import '../pickers/user_image_picker.dart';
+import '../../view_models/user_viewmodel.dart';
 
 class AuthForm extends StatefulWidget {
-  final Function(String email, String password, String username, File image,
-      bool isLogin, BuildContext context) submitAuthForm;
-  final bool isLoading;
-
-  AuthForm(this.submitAuthForm, this.isLoading);
-
   @override
   _AuthFormState createState() => _AuthFormState();
 }
 
 class _AuthFormState extends State<AuthForm> {
   final _formKey = GlobalKey<FormState>();
-  bool _isLogin = true;
-  String _userEmail = '';
-  String _userName = '';
-  String _userPassword = '';
-  File? _userImageFile;
 
-  void _pickImage(File? image) {
-    _userImageFile = image;
-  }
-
-  void _trySubmit() {
+  bool _trySubmit(File? userImageFile, bool isLogin) {
     final isValid = _formKey.currentState!.validate();
 
     FocusScope.of(context).unfocus();
 
-    if (_userImageFile == null && !_isLogin) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Please pick an image'),
-        ),
-      );
-      return;
+    if (userImageFile == null && !isLogin) {
+      showSnackBar('Please select an image');
+      return false;
     }
 
     if (isValid) {
       _formKey.currentState!.save();
-      widget.submitAuthForm(
-        _userEmail.trim(),
-        _userPassword.trim(),
-        _userName.trim(),
-        _userImageFile!,
-        _isLogin,
-        context,
-      );
-      //Send auth request to firebase
+      return true;
     }
+    return false;
+  }
+
+  void showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final userViewModel = Provider.of<UserViewModel>(context);
     return Center(
       child: Card(
         margin: EdgeInsets.all(20),
@@ -67,7 +52,7 @@ class _AuthFormState extends State<AuthForm> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (!_isLogin) UserImagePicker(_pickImage),
+                  if (!userViewModel.isLogin) UserImagePicker(),
                   TextFormField(
                     key: ValueKey('email'),
                     autocorrect: false,
@@ -85,9 +70,9 @@ class _AuthFormState extends State<AuthForm> {
                       }
                       return null;
                     },
-                    onSaved: (value) => _userEmail = value!,
+                    onSaved: (value) => userViewModel.userEmail = value!.trim(),
                   ),
-                  if (!_isLogin)
+                  if (!userViewModel.isLogin)
                     TextFormField(
                       key: ValueKey('username'),
                       autocorrect: true,
@@ -103,7 +88,8 @@ class _AuthFormState extends State<AuthForm> {
                         }
                         return null;
                       },
-                      onSaved: (value) => _userName = value!,
+                      onSaved: (value) =>
+                          userViewModel.userName = value!.trim(),
                     ),
                   TextFormField(
                     key: ValueKey('password'),
@@ -115,25 +101,36 @@ class _AuthFormState extends State<AuthForm> {
                       }
                       return null;
                     },
-                    onSaved: (value) => _userPassword = value!,
+                    onSaved: (value) =>
+                        userViewModel.userPassword = value!.trim(),
                   ),
                   SizedBox(
                     height: 12,
                   ),
-                  if (widget.isLoading) CircularProgressIndicator(),
-                  if (!widget.isLoading)
+                  if (userViewModel.busy) CircularProgressIndicator(),
+                  if (!userViewModel.busy)
                     RaisedButton(
-                      child: Text(_isLogin ? 'Login' : 'Sign up'),
-                      onPressed: _trySubmit,
-                    ),
-                  if (!widget.isLoading)
+                        child:
+                            Text(userViewModel.isLogin ? 'Login' : 'Sign up'),
+                        onPressed: () async {
+                          final isValid = _trySubmit(
+                              userViewModel.userImageFile,
+                              userViewModel.isLogin);
+                          if (isValid) {
+                            final result = await userViewModel.submitAuthForm();
+                            if (result != null) {
+                              showSnackBar(result);
+                            }
+                          }
+                        }),
+                  if (!userViewModel.busy)
                     FlatButton(
                       onPressed: () {
                         setState(() {
-                          _isLogin = !_isLogin;
+                          userViewModel.isLogin = !userViewModel.isLogin;
                         });
                       },
-                      child: Text(_isLogin
+                      child: Text(userViewModel.isLogin
                           ? 'Create new account?'
                           : 'I already have an account'),
                       textColor: Theme.of(context).primaryColor,

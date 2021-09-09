@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+
+import '../../view_models/user_viewmodel.dart';
 
 class UserImagePicker extends StatefulWidget {
-  final Function(File? pickedImage) imagePickFn;
-
-  UserImagePicker(this.imagePickFn);
   @override
   _UserImagePickerState createState() => _UserImagePickerState();
 }
@@ -14,20 +14,21 @@ class _UserImagePickerState extends State<UserImagePicker> {
   File? _pickedImageFile;
   final picker = ImagePicker();
 
-  void _pickImage() async {
-    final pickedImage = await picker.getImage(
+  Future<File?> _pickImage() async {
+    final pickedImage = await picker.pickImage(
       source: ImageSource.gallery,
       imageQuality: 50,
       maxWidth: 150,
     );
     setState(() {
-      _pickedImageFile = File(pickedImage.path);
+      _pickedImageFile = pickedImage != null ? File(pickedImage.path) : null;
     });
-    widget.imagePickFn(_pickedImageFile);
+    return _pickedImageFile;
   }
 
   @override
   Widget build(BuildContext context) {
+    final userViewModel = Provider.of<UserViewModel>(context, listen: false);
     return Column(
       children: [
         CircleAvatar(
@@ -37,7 +38,10 @@ class _UserImagePickerState extends State<UserImagePicker> {
               _pickedImageFile == null ? null : FileImage(_pickedImageFile!),
         ),
         TextButton.icon(
-          onPressed: _pickImage,
+          onPressed: () async {
+            final pickedImage = await _pickImage();
+            userViewModel.userImageFile = pickedImage;
+          },
           icon: Icon(Icons.image),
           label: Text('Add Image'),
           style: TextButton.styleFrom(
