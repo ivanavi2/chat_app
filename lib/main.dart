@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 
@@ -24,6 +23,7 @@ class _MyAppState extends State<MyApp> {
       future: _initialization,
       builder: (context, snapshot) {
         return MaterialApp(
+          debugShowCheckedModeBanner: false,
           title: 'Flutter Chat',
           theme: getThemeData(context),
           home: snapshot.connectionState != ConnectionState.done
@@ -54,18 +54,31 @@ class _MyAppState extends State<MyApp> {
 
   ThemeData getThemeData(BuildContext context) {
     return ThemeData(
-      primarySwatch: Colors.pink,
-      backgroundColor: Colors.pink,
-      accentColor: Colors.pinkAccent,
-      accentColorBrightness: Brightness.dark,
-      buttonTheme: ButtonTheme.of(context).copyWith(
-        buttonColor: Colors.pink,
-        textTheme: ButtonTextTheme.primary,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+        fontFamily: 'Poppins',
+        primaryColor: Color.fromRGBO(34, 72, 113, 1),
+        primarySwatch: Colors.blueGrey,
+        accentColor: Color.fromRGBO(255, 241, 183, 1),
+/*       backgroundColor: Colors.pink,
+      accentColor: Colors.pinkAccent, */
+        // accentColorBrightness: Brightness.dark,
+        buttonTheme: ButtonTheme.of(context).copyWith(
+          buttonColor: Color.fromRGBO(34, 72, 113, 1),
+          textTheme: ButtonTextTheme.primary,
+          padding: EdgeInsets.symmetric(vertical: 10),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
-      ),
-    );
+        inputDecorationTheme: InputDecorationTheme(
+          contentPadding: EdgeInsets.all(12),
+          fillColor: Colors.grey[100],
+          focusColor: Colors.white,
+          filled: true,
+          border: OutlineInputBorder(borderSide: BorderSide.none),
+          focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                  color: Color.fromRGBO(34, 72, 113, 0.15), width: 2)),
+        ));
   }
 }
 

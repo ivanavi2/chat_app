@@ -26,7 +26,10 @@ class UserViewModel with ChangeNotifier {
   get busy => _busy;
 
   get isLogin => this._isLogin;
-  set isLogin(value) => this._isLogin = value;
+  set isLogin(value) {
+    this._isLogin = value;
+    turnIdle();
+  }
 
   get userEmail => this._userEmail;
   set userEmail(value) => this._userEmail = value;
@@ -58,6 +61,7 @@ class UserViewModel with ChangeNotifier {
   }
 
   Future<String?> submitAuthForm() async {
+    print({userEmail, userPassword});
     UserCredential authResult;
 
     turnBusy();

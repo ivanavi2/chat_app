@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 
 import '../widgets/chat/messages.dart';
 import '../widgets/chat/new_message.dart';
@@ -36,23 +37,33 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-/*     final currentUser =
-        Provider.of<UserViewModel>(context, listen: false).currentUser; */
-
     return Scaffold(
       appBar: AppBar(
+        brightness: Brightness.dark,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(4),
+          ),
+        ),
         title: Text('FlutterChat'),
         actions: [
           DropdownButton(
               underline: Container(),
-              icon: Icon(Icons.more_vert),
+              icon: Icon(
+                Icons.more_vert,
+                color: Colors.white,
+              ),
               items: [
                 DropdownMenuItem(
                   value: 'logout',
                   child: Container(
                     child: Row(
                       children: [
-                        Icon(Icons.exit_to_app),
+                        Icon(
+                          Icons.exit_to_app,
+                          color: Colors.black,
+                          size: 20,
+                        ),
                         SizedBox(
                           width: 8,
                         ),
@@ -70,7 +81,8 @@ class _ChatScreenState extends State<ChatScreen> {
         ],
       ),
       body: FutureBuilder(
-        future: Provider.of<UserViewModel>(context).getCurrentUser(),
+        future:
+            Provider.of<UserViewModel>(context, listen: false).getCurrentUser(),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());

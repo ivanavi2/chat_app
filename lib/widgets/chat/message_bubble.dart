@@ -22,7 +22,7 @@ class MessageBubble extends StatelessWidget {
               width: MediaQuery.of(context).size.width * 0.4,
               decoration: BoxDecoration(
                 color: isMyMessage
-                    ? Colors.lightBlue[300]
+                    ? Theme.of(context).primaryColor
                     : Theme.of(context).accentColor,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(12),
@@ -49,16 +49,16 @@ class MessageBubble extends StatelessWidget {
                   Text(
                     username,
                     style: TextStyle(
-                      color: Theme.of(context).accentTextTheme.headline1!.color,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                      color: isMyMessage ? Colors.white : Colors.black87,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   Text(
                     message,
                     style: TextStyle(
-                      color: Theme.of(context).accentTextTheme.headline1!.color,
-                      fontSize: 16,
+                      color: isMyMessage ? Colors.white : Colors.black87,
+                      fontSize: 14,
                     ),
                     textAlign: isMyMessage ? TextAlign.end : TextAlign.start,
                   ),
@@ -67,14 +67,20 @@ class MessageBubble extends StatelessWidget {
             ),
           ],
         ),
-        Positioned(
-          left: isMyMessage ? null : MediaQuery.of(context).size.width * 0.38,
-          right: isMyMessage ? MediaQuery.of(context).size.width * 0.38 : null,
-          child: CircleAvatar(
-            backgroundColor: Colors.grey,
-            backgroundImage: NetworkImage(imageUrl),
+        if (!isMyMessage)
+          Positioned(
+            //    left: isMyMessage ? null : MediaQuery.of(context).size.width * 0.38,
+            left: MediaQuery.of(context).size.width * 0.38,
+            child: CircleAvatar(
+              backgroundColor: Theme.of(context).primaryColor,
+              radius: 20.5,
+              child: CircleAvatar(
+                radius: 20,
+                backgroundColor: Colors.grey,
+                backgroundImage: NetworkImage(imageUrl),
+              ),
+            ),
           ),
-        ),
       ],
     );
   }
